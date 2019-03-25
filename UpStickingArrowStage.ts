@@ -8,6 +8,8 @@ const nodes : number = 5
 const lines : number = 2
 const backColor : string = "#bdbdbd"
 const foreColor : string = "#673AB7"
+const angle : number = Math.PI / 3
+const offFactor : number = 5
 
 const scaleFactor : Function = (scale : number) : number => Math.floor(scale / scDiv)
 const maxScale : Function = (scale : number, i : number, n : number) : number => {
@@ -22,6 +24,35 @@ const mirrorValue : Function = (scale : number, a : number, b : number) : number
 }
 const updateValue : Function = (scale : number, dir : number, a : number, b : number) : number => {
     return mirrorValue(scale, a, b) * dir * scGap
+}
+
+const drawUASNode : Function = (context : CanvasRenderingContext2D, i : number, scale : number) => {
+    const gap : number = w / (nodes + 1)
+    const size : number = gap / sizeFactor
+    const hoff : number = size / offFactor
+    const sc1 : number = divideScale(scale, 0, 2)
+    const sc2 : number = divideScale(scale, 1, 2)
+    context.lineCap = 'round'
+    context.lineWidth = Math.min(w, h) / strokeFactor
+    context.strokeStyle = foreColor
+    context.save()
+    context.translate(gap * (i + 1), h / 2 - (h - hoff / 2) * sc2)
+    context.rotate((i % 2) * Math.PI)
+    context.beginPath()
+    context.moveTo(0, size)
+    context.lineTo(0, -(size - hoff))
+    context.stroke()
+    for (var j = 0; j < lines; j++) {
+        context.save()
+        context.translate(0, -(size - hoff))
+        context.rotate((1 - 2 * j) * Math.PI / 3)
+        context.beginPath()
+        context.moveTo(0, 0)
+        context.lineTo(0, -hoff)
+        context.stroke()
+        context.restore()
+    }
+    context.restore()
 }
 
 class UpStickingArrowStage {
@@ -58,6 +89,7 @@ class State {
     scale : number = 0
     prevScale : number = 0
     dir : number = 0
+
     update(cb : Function) {
         this.scale += updateValue(this.scale, this.dir, lines, 1)
         if (Math.abs(this.scale - this.prevScale) > 1) {
