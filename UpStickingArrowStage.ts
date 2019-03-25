@@ -195,3 +195,25 @@ class UpStickingArrow {
         this.curr.startUpdating(cb)
     }
 }
+
+class Renderer {
+
+    animator : Animator = new Animator()
+    uas : UpStickingArrow = new UpStickingArrow()
+
+    render(context : CanvasRenderingContext2D) {
+        this.uas.draw(context)
+    }
+
+    handleTap(cb : Function) {
+        this.uas.startUpdating(() => {
+            this.animator.start(() => {
+                cb()
+                this.uas.update(() => {
+                    this.animator.stop()
+                    cb()
+                })
+            })
+        })
+    }
+}
